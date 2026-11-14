@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- This line makes the page fit phone screens instead of looking zoomed out -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Submit Your Deal</title>
+  <meta name="description" content="Submit your real estate deal and talk to someone within 24 hours.">
+
+  <style>
+    /* =========================================================
+       1. DESIGN SETTINGS (colors, spacing) - change these to restyle
+       ========================================================= */
+    :root {
+      --color-bg: #f7f8fa;
+      --color-card: #ffffff;
+      --color-text: #1c2430;
+      --color-muted: #5b6575;
+      --color-primary: #1f5eff;
+      --color-primary-dark: #1648c9;
+      --color-border: #d9dee6;
+      --color-error: #c62828;
+      --color-success: #1b7f4b;
+      --radius: 12px;
+      --max-width: 960px;
+    }
+
+    /* =========================================================
+       2. BASICS - applied to the whole page
+       ========================================================= */
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--color-text);
+      background: var(--color-bg);
+    }
+
+    h1, h2, h3 { line-height: 1.2; margin: 0 0 12px; }
+
+    /* A centered column with 16px space on each side (good on phones) */
+    .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    section { padding: 48px 0; }
+
+    .section-intro { color: var(--color-muted); margin: 0 0 24px; }
+
+    /* =========================================================
+       3. HERO (the big headline at the top)
+       ========================================================= */
+    .hero {
+      background: var(--color-text);
+      color: #ffffff;
+      padding: 64px 0;
+    }
+    .hero h1 { font-size: 2rem; }
+    .hero p { color: #c8d0dc; font-size: 1.125rem; margin: 0 0 24px; }
+
+    /* =========================================================
+       4. BUTTONS - big and easy to tap (at least 48px tall)
+       ========================================================= */
+    .btn {
+      display: inline-block;
+      width: 100%;
+      min-height: 52px;
+      padding: 14px 20px;
+      font-size: 1.0625rem;
+      font-weight: 600;
+      text-align: center;
+      text-decoration: none;
+      border: 2px solid var(--color-primary);
+      border-radius: var(--radius);
+      background: var(--color-primary);
+      color: #ffffff;
+      cursor: pointer;
+    }
+    .btn:hover { background: var(--color-primary-dark); border-color: var(--color-primary-dark); }
+
+    /* A lighter "secondary" button, used for Back / Skip */
+    .btn-secondary {
+      background: transparent;
+      color: var(--color-primary);
+    }
+    .btn-secondary:hover { background: #eef3ff; }
+
+    /* =========================================================
+       5. CARDS (used for programs, case studies, steps)
+       ========================================================= */
+    .grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 1fr; /* one column on phones */
+    }
+
+    .card {
+      background: var(--color-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .card p { margin: 0; color: var(--color-muted); }
+
+    .badge {
+      display: inline-block;
+      background: #fff4d6;
+      color: #7a5600;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    .minimum {
+      margin-top: 20px;
+      font-weight: 600;
+    }
+
+    /* Numbered circles for "How it works" */
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      color: #ffffff;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    /* =========================================================
+       6. FORM
+       ========================================================= */
+    .form-card { max-width: 560px; margin: 0 auto; }
+
+    /* Progress bar: "Step 1 of 2" */
+    .progress-label { font-weight: 600; margin: 0 0 8px; }
+    .progress-track {
+      height: 8px;
+      background: var(--color-border);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 50%;              /* JavaScript changes this to 100% on step 2 */
+      background: var(--color-primary);
+      transition: width 0.3s ease;
+    }
+
+    .field { margin-bottom: 18px; }
+
+    label, legend {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .optional { font-weight: 400; color: var(--color-muted); }
+
+    input[type="text"],
+    input[type="tel"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      min-height: 50px;
+      padding: 12px;
+      font-size: 1rem;  /* 16px stops iPhones from zooming in when you tap a box */
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      background: #ffffff;
+      color: var(--color-text);
+    }
+    textarea { min-height: 110px; resize: vertical; }
+
+    input:focus, select:focus, textarea:focus {
+      outline: 3px solid #b9ccff;
+      border-color: var(--color-primary);
+    }
+
+    fieldset { border: 0; padding: 0; margin: 0; }
+
+    /* Yes / No choices styled as big buttons */
+    .choice-row { display: flex; gap: 12px; }
+    .choice {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 52px;
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius);
+      background: #ffffff;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 0;
+    }
+    .choice input { width: 20px; height: 20px; }
+    .choice:has(input:checked) { border-color: var(--color-primary); background: #eef3ff; }
+
+    /* Consent checkbox */
+    .consent {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      font-weight: 400;
+      cursor: pointer;
+    }
+    .consent input { width: 24px; height: 24px; flex-shrink: 0; margin-top: 2px; }
+
+    .disclaimer {
+      font-size: 0.875rem;
+      color: var(--color-muted);
+      margin: 12px 0 20px;
+    }
+
+    .error-message {
+      color: var(--color-error);
+      font-size: 0.875rem;
+      margin-top: 4px;
+      min-height: 1em;
+    }
+    .has-error input,
+    .has-error select { border-color: var(--color-error); }
+
+    .button-stack { display: grid; gap: 12px; }
+
+    /* Things with the "hidden" attribute stay hidden */
+    [hidden] { display: none !important; }
+
+    .thank-you { text-align: center; }
+    .thank-you h2 { color: var(--color-success); }
+
+    footer {
+      text-align: center;
+      color: var(--color-muted);
+      font-size: 0.875rem;
+      padding: 32px 0;
+    }
+
+    /* =========================================================
+       7. BIGGER SCREENS - mobile-first means we start small,
+          then add rules here for tablets and laptops
+       ========================================================= */
+    @media (min-width: 700px) {
+      .hero h1 { font-size: 2.75rem; }
+      .grid-3 { grid-template-columns: repeat(3, 1fr); }
+      .grid-programs { grid-template-columns: repeat(2, 1fr); }
+      .btn-hero { width: auto; }
+      .button-stack { grid-template-columns: 1fr 2fr; }
+    }
+
+    @media (min-width: 960px) {
+      .grid-programs { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ===================== HERO ===================== -->
+  <header class="hero">
+    <div class="container">
+      <h1>Submit your deal. Talk to someone within 24 hours.</h1>
+      <p>Real estate loans from $100K. Tell us about your deal in about two minutes.</p>
+      <a href="#submit" class="btn btn-hero">Submit your deal</a>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ===================== WHAT WE FUND ===================== -->
+    <section id="programs">
+      <div class="container">
+        <h2>What we fund</h2>
+        <p class="section-intro">Loan programs for investors and builders.</p>
+
+        <div class="grid grid-programs">
+          <div class="card">
+            <h3>Fix &amp; Flip</h3>
+            <p>Short-term loans to buy, renovate and sell.</p>
+          </div>
+          <div class="card">
+            <h3>DSCR / Rental</h3>
+            <p>Long-term loans based on the property's rental income.</p>
+          </div>
+          <div class="card">
+            <h3>Gap Funding</h3>
+            <p>Extra capital to cover what your main lender doesn't.</p>
+          </div>
+          <div class="card">
+            <h3>Ground-Up Construction</h3>
+            <p>Financing to build new from the ground up.</p>
+          </div>
+          <div class="card">
+            <h3>Private / Hard Money</h3>
+            <p>Fast, asset-based loans when timing matters.</p>
+          </div>
+        </div>
+
+        <p class="minimum">$100K minimum loan amount.</p>
+      </div>
+    </section>
+
+    <!-- ===================== CASE STUDIES ===================== -->
+    <section id="case-studies">
+      <div class="container">
+        <h2>Recent deals</h2>
+        <p class="section-intro">Examples of deals we've helped close.</p>
+
+        <div class="grid grid-3">
+          <div class="card">
+            <span class="badge">[PLACEHOLDER]</span>
+            <h3>Case study 1</h3>
+            <p>Program, location, loan amount and outcome go here.</p>
+          </div>
+          <div class="card">
+            <span class="badge">[PLACEHOLDER]</span>
+            <h3>Case study 2</h3>
+            <p>Program, location, loan amount and outcome go here.</p>
+          </div>
+          <div class="card">
+            <span class="badge">[PLACEHOLDER]</span>
+            <h3>Case study 3</h3>
+            <p>Program, location, loan amount and outcome go here.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== HOW IT WORKS ===================== -->
+    <section id="how-it-works">
+      <div class="container">
+        <h2>How it works</h2>
+
+        <div class="grid grid-3">
+          <div class="card">
+            <span class="step-number">1</span>
+            <h3>Submit</h3>
+            <p>Share the basics of your deal using the form below.</p>
+          </div>
+          <div class="card">
+            <span class="step-number">2</span>
+            <h3>Book a call</h3>
+            <p>We reach out within 24 hours to talk it through.</p>
+          </div>
+          <div class="card">
+            <span class="step-number">3</span>
+            <h3>Next steps</h3>
+            <p>If it's a fit, we explain the options and what we need from you.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== THE FORM ===================== -->
+    <section id="submit">
+      <div class="container">
+        <div class="card form-card">
+
+          <!-- Everything inside this div is hidden after a successful submit -->
+          <div id="form-area">
+            <h2>Submit your deal</h2>
+
+            <!-- Progress bar -->
+            <p class="progress-label" id="progress-label">Step 1 of 2</p>
+            <div class="progress-track" aria-hidden="true">
+              <div class="progress-fill" id="progress-fill"></div>
+            </div>
+
+            <!-- novalidate = we check the fields ourselves in JavaScript -->
+            <form id="deal-form" novalidate>
+
+              <!-- ---------- STEP 1: required basics ---------- -->
+              <div id="step-1">
+                <div class="field">
+                  <label for="name">Full name</label>
+                  <input type="text" id="name" name="name" autocomplete="name">
+                  <p class="error-message" id="name-error"></p>
+                </div>
+
+                <div class="field">
+                  <label for="contact">Phone or email</label>
+                  <input type="text" id="contact" name="contact" autocomplete="email">
+                  <p class="error-message" id="contact-error"></p>
+                </div>
+
+                <div class="field">
+                  <label for="loanAmount">Loan amount needed ($)</label>
+                  <input type="number" id="loanAmount" name="loanAmount" inputmode="numeric" min="100000" step="1000" placeholder="100000">
+                  <p class="error-message" id="loanAmount-error"></p>
+                </div>
+
+                <div class="field">
+                  <label for="program">Loan program</label>
+                  <select id="program" name="program">
+                    <option value="">Choose one</option>
+                    <option>Fix &amp; Flip</option>
+                    <option>DSCR / Rental</option>
+                    <option>Gap Funding</option>
+                    <option>Ground-Up Construction</option>
+                    <option>Private / Hard Money</option>
+                    <option>Not sure</option>
+                  </select>
+                  <p class="error-message" id="program-error"></p>
+                </div>
+
+                <div class="field">
+                  <label for="state">Property state</label>
+                  <select id="state" name="state">
+                    <option value="">Choose a state</option>
+                    <!-- JavaScript fills in the 50 states + DC below -->
+                  </select>
+                  <p class="error-message" id="state-error"></p>
+                </div>
+
+                <fieldset class="field" id="underContract-field">
+                  <legend>Is the property under contract?</legend>
+                  <div class="choice-row">
+                    <label class="choice"><input type="radio" name="underContract" value="yes"> Yes</label>
+                    <label class="choice"><input type="radio" name="underContract" value="no"> No</label>
+                  </div>
+                  <p class="error-message" id="underContract-error"></p>
+                </fieldset>
+
+                <button type="button" class="btn" id="next-btn">Next</button>
+              </div>
+
+              <!-- ---------- STEP 2: optional details ---------- -->
+              <div id="step-2" hidden>
+                <p class="section-intro">All of these are optional, but they help us move faster.</p>
+
+                <div class="field">
+                  <label for="purchasePrice">Purchase price ($) <span class="optional">(optional)</span></label>
+                  <input type="number" id="purchasePrice" name="purchasePrice" inputmode="numeric" min="0">
+                </div>
+
+                <div class="field">
+                  <label for="arv">ARV - after repair value ($) <span class="optional">(optional)</span></label>
+                  <input type="number" id="arv" name="arv" inputmode="numeric" min="0">
+                </div>
+
+                <div class="field">
+                  <label for="rehabBudget">Rehab budget ($) <span class="optional">(optional)</span></label>
+                  <input type="number" id="rehabBudget" name="rehabBudget" inputmode="numeric" min="0">
+                </div>
+
+                <div class="field">
+                  <label for="timeline">When do you need to close? <span class="optional">(optional)</span></label>
+                  <select id="timeline" name="timeline">
+                    <option value="">Choose one</option>
+                    <option>ASAP / under 2 weeks</option>
+                    <option>2 to 4 weeks</option>
+                    <option>1 to 3 months</option>
+                    <option>Just exploring</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="notes">Anything else? <span class="optional">(optional)</span></label>
+                  <textarea id="notes" name="notes" placeholder="Address, exit plan, experience, questions..."></textarea>
+                </div>
+
+                <!-- Consent + disclaimer -->
+                <div class="field" id="consent-field">
+                  <label class="consent">
+                    <input type="checkbox" id="consent" name="consent">
+                    <span>I agree to be contacted by phone, text or email about my deal.</span>
+                  </label>
+                  <p class="error-message" id="consent-error"></p>
+                </div>
+
+                <p class="disclaimer">Submitting is not a loan approval or commitment to lend.</p>
+
+                <div class="button-stack">
+                  <button type="button" class="btn btn-secondary" id="back-btn">Back</button>
+                  <button type="submit" class="btn">Submit my deal</button>
+                </div>
+              </div>
+
+            </form>
+          </div>
+
+          <!-- Thank-you message, shown after submitting -->
+          <div id="thank-you" class="thank-you" hidden>
+            <h2>Thanks! Your deal is in.</h2>
+            <p>Someone will reach out within 24 hours.</p>
+            <p class="disclaimer">Demo mode: nothing was sent. Open the browser console to see the data.</p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>[PLACEHOLDER] Company name &middot; Licensing info &middot; Contact</p>
+    </div>
+  </footer>
+
+
+  <script>
+    // =========================================================
+    // Grab the parts of the page we need to work with
+    // =========================================================
+    const form          = document.getElementById("deal-form");
+    const step1         = document.getElementById("step-1");
+    const step2         = document.getElementById("step-2");
+    const nextBtn       = document.getElementById("next-btn");
+    const backBtn       = document.getElementById("back-btn");
+    const progressLabel = document.getElementById("progress-label");
+    const progressFill  = document.getElementById("progress-fill");
+    const formArea      = document.getElementById("form-area");
+    const thankYou      = document.getElementById("thank-you");
+
+    const MINIMUM_LOAN = 100000;
+
+
+    // =========================================================
+    // Fill the "state" dropdown so we don't type 51 lines of HTML
+    // =========================================================
+    const STATES = [
+      "AL","AK","AZ","AR","CA","CO","CT","DE","DC","FL","GA","HI","ID","IL",
+      "IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE",
+      "NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD",
+      "TN","TX","UT","VT","VA","WA","WV","WI","WY"
+    ];
+
+    const stateSelect = document.getElementById("state");
+    STATES.forEach(function (code) {
+      const option = document.createElement("option");
+      option.value = code;
+      option.textContent = code;
+      stateSelect.appendChild(option);
+    });
+
+
+    // =========================================================
+    // Small helpers to show or clear an error under a field
+    // =========================================================
+    function showError(fieldId, message) {
+      document.getElementById(fieldId + "-error").textContent = message;
+      document.getElementById(fieldId).closest(".field").classList.add("has-error");
+    }
+
+    function clearError(fieldId) {
+      document.getElementById(fieldId + "-error").textContent = "";
+      document.getElementById(fieldId).closest(".field").classList.remove("has-error");
+    }
+
+    // Simple checks: does it look like an email, or like a phone number?
+    function looksLikeEmail(text) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text);
+    }
+    function looksLikePhone(text) {
+      const digits = text.replace(/\D/g, ""); // keep only the numbers
+      return digits.length >= 10;
+    }
+
+
+    // =========================================================
+    // Check Step 1. Returns true if everything is filled in correctly.
+    // =========================================================
+    function validateStep1() {
+      let isValid = true;
+
+      const name = form.name.value.trim();
+      const contact = form.contact.value.trim();
+      const loanAmount = Number(form.loanAmount.value);
+      const underContract = form.querySelector('input[name="underContract"]:checked');
+
+      // Start fresh: remove old error messages
+      ["name", "contact", "loanAmount", "program", "state"].forEach(clearError);
+      document.getElementById("underContract-error").textContent = "";
+
+      if (name === "") {
+        showError("name", "Please enter your name.");
+        isValid = false;
+      }
+
+      if (!looksLikeEmail(contact) && !looksLikePhone(contact)) {
+        showError("contact", "Enter a valid email or a 10-digit phone number.");
+        isValid = false;
+      }
+
+      if (!loanAmount || loanAmount < MINIMUM_LOAN) {
+        showError("loanAmount", "Our minimum loan is $100,000.");
+        isValid = false;
+      }
+
+      if (form.program.value === "") {
+        showError("program", "Please choose a program.");
+        isValid = false;
+      }
+
+      if (form.state.value === "") {
+        showError("state", "Please choose a state.");
+        isValid = false;
+      }
+
+      if (!underContract) {
+        document.getElementById("underContract-error").textContent = "Please choose yes or no.";
+        isValid = false;
+      }
+
+      return isValid;
+    }
+
+
+    // =========================================================
+    // Switch between Step 1 and Step 2
+    // =========================================================
+    function goToStep(stepNumber) {
+      step1.hidden = stepNumber !== 1;
+      step2.hidden = stepNumber !== 2;
+
+      progressLabel.textContent = "Step " + stepNumber + " of 2";
+      progressFill.style.width = stepNumber === 1 ? "50%" : "100%";
+
+      // Scroll back to the top of the form so the user sees the new step
+      formArea.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    nextBtn.addEventListener("click", function () {
+      if (validateStep1()) {
+        goToStep(2);
+      }
+    });
+
+    backBtn.addEventListener("click", function () {
+      goToStep(1);
+    });
+
+
+    // =========================================================
+    // Submit (DEMO MODE: nothing is sent anywhere)
+    // =========================================================
+    form.addEventListener("submit", function (event) {
+      event.preventDefault(); // stop the browser from reloading the page
+
+      // Consent is required before submitting
+      clearError("consent");
+      if (!form.consent.checked) {
+        showError("consent", "Please check the box so we can contact you.");
+        return;
+      }
+
+      // Collect every field into one simple object
+      const formData = new FormData(form);
+      const deal = Object.fromEntries(formData.entries());
+      deal.consent = form.consent.checked;
+      deal.submittedAt = new Date().toISOString();
+
+      // Demo mode: print the data instead of sending it
+      console.log("DEMO MODE - deal submitted:", deal);
+
+      // Swap the form for the thank-you message
+      formArea.hidden = true;
+      thankYou.hidden = false;
+      thankYou.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  </script>
+
+</body>
+</html>
