@@ -1,0 +1,5 @@
+# Automatic backups of index.html made by the backup hook (kept only on this computer)
+.claude/backups/
+
+# Personal Claude Code settings that shouldn't be shared
+.claude/settings.local.json
