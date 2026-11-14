@@ -582,6 +582,10 @@
     .thank-you .draw { animation-delay: 0s; animation-duration: 0.6s; }
     .thank-you .draw.second { animation-delay: 0.45s; }
     .thank-you p { color: var(--muted); }
+    .thank-you .btn { margin: 20px 0 8px; }
+    .send-error { color: var(--error); font-size: 0.9375rem; margin: 0 0 16px; }
+    /* Spam trap: hidden from people, only bots fill it in */
+    .botcheck { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
 
     /* =========================================================
        13. CLOSING CALL TO ACTION
@@ -990,9 +994,13 @@
 
                 <p class="disclaimer">Submitting is not a loan approval or commitment to lend.</p>
 
+                <!-- Spam trap: hidden from people. Bots that tick it get rejected. -->
+                <input type="checkbox" name="botcheck" class="botcheck" tabindex="-1" autocomplete="off" aria-hidden="true">
+                <p class="send-error" id="send-error" role="alert" hidden></p>
+
                 <div class="button-stack">
                   <button type="button" class="btn btn-ghost" id="back-btn">Back</button>
-                  <button type="submit" class="btn btn-primary">Send my deal</button>
+                  <button type="submit" class="btn btn-primary" id="send-btn">Send my deal</button>
                 </div>
               </div>
 
@@ -1007,7 +1015,8 @@
             </svg>
             <h2>Your deal was sent.</h2>
             <p>Someone will reach out within 24 hours.</p>
-            <p class="disclaimer">Demo mode: nothing was sent anywhere yet. Open the browser console to see the data.</p>
+            <a class="btn btn-primary" id="book-call" href="#" target="_blank" rel="noopener" hidden>Book your call now</a>
+            <p class="disclaimer" id="demo-note" hidden>Demo mode: nothing was sent anywhere yet. Open the browser console to see the data.</p>
           </div>
         </div>
       </div>
@@ -1038,6 +1047,16 @@
 
 
   <script>
+    // =========================================================
+    // YOUR SETTINGS: paste these in, nothing else needs changing.
+    //  - WEB3FORMS_KEY: the access key Web3Forms emailed you. It is
+    //    safe to have here; it can only send deals to your inbox.
+    //  - CALENDLY_URL: your Calendly meeting link.
+    //  Leave a setting blank ("") and that part stays in demo mode.
+    // =========================================================
+    const WEB3FORMS_KEY = "";
+    const CALENDLY_URL  = "";
+
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 
@@ -1242,11 +1261,31 @@
     nextBtn.addEventListener("click", function () { if (validateStep1()) goToStep(2); });
     backBtn.addEventListener("click", function () { goToStep(1); });
 
-    // Send (DEMO MODE: nothing goes anywhere yet)
-    form.addEventListener("submit", function (event) {
+    // Send the deal: to your email through Web3Forms, or demo mode if no key is set
+    const sendBtn   = document.getElementById("send-btn");
+    const sendError = document.getElementById("send-error");
+    const bookCall  = document.getElementById("book-call");
+    const demoNote  = document.getElementById("demo-note");
+
+    function showThankYou(deal) {
+      if (CALENDLY_URL) {
+        // Fill in their name (and email, if they gave one) on the booking page
+        const params = new URLSearchParams();
+        if (deal.name) params.set("name", deal.name);
+        if (deal.contact && deal.contact.includes("@")) params.set("email", deal.contact);
+        bookCall.href = CALENDLY_URL + (CALENDLY_URL.includes("?") ? "&" : "?") + params.toString().replace(/\+/g, "%20");
+        bookCall.hidden = false;
+      }
+      formArea.hidden = true;
+      thankYou.hidden = false;
+      thankYou.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
+    }
+
+    form.addEventListener("submit", async function (event) {
       event.preventDefault();
 
       clearError("consent");
+      sendError.hidden = true;
       if (!form.consent.checked) {
         showError("consent", "Check the box so we can contact you about this deal.");
         form.consent.focus();
@@ -1256,12 +1295,44 @@
       const deal = Object.fromEntries(new FormData(form).entries());
       deal.consent = form.consent.checked;
       deal.submittedAt = new Date().toISOString();
+      delete deal.botcheck;
 
-      console.log("DEMO MODE - deal submitted:", deal);
+      // No key yet: demo mode, data only goes to the browser console
+      if (!WEB3FORMS_KEY) {
+        console.log("DEMO MODE - deal submitted:", deal);
+        demoNote.hidden = false;
+        showThankYou(deal);
+        return;
+      }
 
-      formArea.hidden = true;
-      thankYou.hidden = false;
-      thankYou.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
+      const amount = deal.loanAmount ? "$" + Number(deal.loanAmount).toLocaleString("en-US") : "amount not given";
+      const message = Object.assign({
+        access_key: WEB3FORMS_KEY,
+        subject: "New deal: " + (deal.program || "program not given") + ", " + amount + ", " + (deal.state || "state not given"),
+        from_name: "Deal Pipeline website",
+        botcheck: form.botcheck.checked
+      }, deal);
+      if (deal.contact && deal.contact.includes("@")) message.replyto = deal.contact;
+
+      sendBtn.disabled = true;
+      sendBtn.textContent = "Sending…";
+      try {
+        const response = await fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Accept": "application/json" },
+          body: JSON.stringify(message)
+        });
+        const result = await response.json();
+        if (!result.success) throw new Error(result.message || "Not accepted");
+        showThankYou(deal);
+      } catch (problem) {
+        console.error("Deal not sent:", problem);
+        sendError.textContent = "We couldn't send your deal. Check your connection and try again, or call us at [PLACEHOLDER].";
+        sendError.hidden = false;
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.textContent = "Send my deal";
+      }
     });
   </script>
 
