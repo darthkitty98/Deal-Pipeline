@@ -240,7 +240,8 @@
       isolation: isolate;
       overflow: hidden;           /* nothing sticks out past the screen edge */
     }
-    .hero > .photo { position: absolute; inset: 0; z-index: -3; --pos: 70% center; }
+    .hero > .photo { position: absolute; inset: 0; z-index: -3; }
+    .hero > .photo .photo-label { display: none; }
     /* Dark gradient so the text is always readable over the photo */
     .hero-shade {
       position: absolute;
@@ -249,18 +250,25 @@
       background:
         linear-gradient(180deg, rgba(11, 31, 58, 0.85) 0%, rgba(11, 31, 58, 0.15) 35%, rgba(11, 31, 58, 0.55) 65%, var(--midnight) 100%);
     }
-    /* The blueprint drawing laid over the house */
-    /* Phones: the drawing is its own picture above the headline */
-    .hero-lines {
+    /* The blueprint lines traced over the real house.
+       Phones and upright tablets: a framed photo card above the headline.
+       Wide screens: the lines sit right on top of the full-width photo. */
+    .hero-card {
       position: relative;
-      z-index: -1;
-      width: 88%;
-      max-width: 420px;
-      margin: 0 auto 28px;
-      pointer-events: none;
+      width: 100%;
+      max-width: 460px;
+      aspect-ratio: 4 / 3;
+      margin: 0 0 28px;
+      border-radius: var(--radius-panel);
+      overflow: hidden;
+      border: 1px solid rgba(156, 195, 240, 0.25);
+      box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.6);
+      background: linear-gradient(180deg, #1C3F70, #0E2442);
     }
-    .hero-lines svg { display: block; width: 100%; height: auto; overflow: visible; }
-    .hero-lines .ln {
+    .hero-card svg { display: block; width: 100%; height: 100%; }
+    .hero-lines { display: none; position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+    .hero-lines svg { display: block; width: 100%; height: 100%; }
+    .ln {
       fill: none;
       stroke: var(--linework);
       stroke-width: 1.6;
@@ -268,11 +276,11 @@
       stroke-linejoin: round;
       vector-effect: non-scaling-stroke;
     }
-    .hero-lines .thin { stroke-width: 1; opacity: 0.7; }
-    .hero-lines text { fill: var(--muted); font-family: var(--font-display); font-stretch: 112%; font-size: 13px; }
-    /* After drawing, the lines settle down to a soft glow */
-    .hero-lines svg { animation: settle 1.2s ease 2.9s forwards; filter: drop-shadow(0 0 6px rgba(156, 195, 240, 0.55)); }
-    @keyframes settle { to { opacity: 0.55; } }
+    .ln.thin { stroke-width: 1; opacity: 0.8; }
+    .lines text { fill: var(--paper); font-family: var(--font-display); font-stretch: 112%; }
+    /* After drawing, the lines settle down to a soft glow over the photo */
+    .lines { animation: settle 1.2s ease 2.9s forwards; filter: drop-shadow(0 0 4px rgba(156, 195, 240, 0.7)); }
+    @keyframes settle { to { opacity: 0.6; } }
 
     /* Each line draws itself, one after another */
     .draw {
@@ -601,15 +609,12 @@
       .section { padding-top: 120px; padding-bottom: 120px; }
       .nav-links { display: flex; }
       .hero { justify-content: center; padding-top: 120px; padding-bottom: 72px; }
-      .hero > .photo { --pos: center; }
       .hero h1 { font-size: clamp(2.6rem, 5.4vw, 4.6rem); max-width: 11.5ch; }
       .hero-shade {
         background:
           linear-gradient(90deg, rgba(11, 31, 58, 0.94) 0%, rgba(11, 31, 58, 0.72) 38%, rgba(11, 31, 58, 0.15) 70%, rgba(11, 31, 58, 0.05) 100%),
           linear-gradient(180deg, transparent 70%, var(--midnight) 100%);
       }
-      /* Laptops: the drawing floats on the right, over the photo */
-      .hero-lines { position: absolute; margin: 0; max-width: 720px; right: 2%; top: 50%; transform: translateY(-46%); width: 46%; }
       .fact { padding: 20px 24px; }
 
       .trust-inner { grid-template-columns: 220px 1fr; }
@@ -640,8 +645,10 @@
       .footer-inner { grid-template-columns: 1fr auto; align-items: end; }
     }
 
-    @media (min-width: 1100px) {
-      .hero-lines { width: 44%; right: 3%; }
+    /* Wide screens: full-width photo with the lines traced on the house */
+    @media (min-width: 760px) and (min-aspect-ratio: 4/3) {
+      .hero-card { display: none; }
+      .hero-lines { display: block; }
     }
 
     /* =========================================================
@@ -651,7 +658,7 @@
       html { scroll-behavior: auto; }
       .draw { animation: none; stroke-dashoffset: 0; }
       .appear { animation: none; opacity: 1; }
-      .hero-lines svg { animation: none; opacity: 0.55; }
+      .lines { animation: none; opacity: 0.6; }
       .steps::before { transition: none; }
       .step-enter { animation: none; }
       .stage-photos .photo, .progress-fill, .btn, .faq .icon::after { transition: none; }
@@ -683,25 +690,45 @@
     </div>
     <div class="hero-shade" aria-hidden="true"></div>
 
-    <!-- Blueprint lines that draw themselves over the house -->
+    <!-- Blueprint lines traced over the house in the photo (AI-drafted photo:
+         swap for a real deal photo later, then re-trace these lines) -->
+    <!-- Wide screens: same lines, laid over the full-width photo -->
     <div class="hero-lines" aria-hidden="true">
-      <svg viewBox="0 0 560 400">
-        <path class="ln draw" pathLength="1" style="--i:0" d="M0 330 H560"/>
-        <path class="ln draw" pathLength="1" style="--i:1" d="M90 330 V170 H470 V330"/>
-        <path class="ln draw" pathLength="1" style="--i:2" d="M66 180 L280 52 L494 180"/>
-        <path class="ln draw" pathLength="1" style="--i:3" d="M380 116 V74 H410 V134"/>
-        <path class="ln draw" pathLength="1" style="--i:4" d="M250 330 V238 H310 V330"/>
-        <path class="ln draw" pathLength="1" style="--i:5" d="M128 206 H198 V262 H128 Z M163 206 V262 M128 234 H198"/>
-        <path class="ln draw" pathLength="1" style="--i:5" d="M362 206 H432 V262 H362 Z M397 206 V262 M362 234 H432"/>
-        <path class="ln draw thin" pathLength="1" style="--i:6" d="M280 104 m-16 0 a16 16 0 1 0 32 0 a16 16 0 1 0 -32 0"/>
-        <path class="ln draw thin" pathLength="1" style="--i:7" d="M90 360 H470 M90 352 V368 M470 352 V368"/>
-        <text class="appear" style="--i:7" x="280" y="388" text-anchor="middle">32′-0″</text>
-        <path class="ln draw thin" pathLength="1" style="--i:8" d="M520 52 V330 M512 52 H528 M512 330 H528"/>
-        <text class="appear" style="--i:8" x="540" y="196" transform="rotate(90 540 196)" text-anchor="middle">24′-6″</text>
+      <svg viewBox="0 0 2000 1116" preserveAspectRatio="xMidYMid slice">
+      <g class="lines">
+        <path class="ln draw" pathLength="1" style="--i:0" d="M990 866 H1880"/>
+        <path class="ln draw" pathLength="1" style="--i:1" d="M1010 862 V392 M1812 388 V862"/>
+        <path class="ln draw" pathLength="1" style="--i:2" d="M950 386 L1385 148 L1592 252"/>
+        <path class="ln draw" pathLength="1" style="--i:3" d="M1386 390 L1640 230 L1885 364 M1470 352 H1795"/>
+        <path class="ln draw" pathLength="1" style="--i:4" d="M1017 340 V220 H1063 V312"/>
+        <path class="ln draw" pathLength="1" style="--i:4" d="M935 606 L1240 515 L1555 606 M1040 614 V860 M1455 614 V860"/>
+        <path class="ln draw" pathLength="1" style="--i:5" d="M1290 840 V656 H1430 V840 M1325 840 V664 H1395 V840"/>
+        <path class="ln draw thin" pathLength="1" style="--i:6" d="M1100 410 H1252 V530 H1100 Z M1176 410 V530 M1338 410 H1402 V503 H1338 Z M1545 388 H1712 V520 H1545 Z M1628 388 V520 M1097 655 H1250 V780 H1097 Z M1173 655 V780 M1545 645 H1712 V780 H1545 Z M1628 645 V780"/>
+        <path class="ln draw thin" pathLength="1" style="--i:7" d="M1010 912 H1812 M1010 900 V924 M1812 900 V924"/>
+        <text class="appear" style="--i:7" x="1411" y="956" font-size="26" text-anchor="middle">40′-0″</text>
+      </g>
       </svg>
     </div>
 
     <div class="container hero-content">
+      <!-- Phones and upright tablets: framed photo card -->
+      <div class="hero-card" aria-hidden="true">
+        <svg viewBox="280 650 920 690">
+        <image href="images/hero-phone.webp" x="0" y="0" width="1200" height="1490"/>
+        <g class="lines">
+          <path class="ln draw" pathLength="1" style="--i:0" d="M300 1286 H1180"/>
+          <path class="ln draw" pathLength="1" style="--i:1" d="M408 1284 V890 M1050 885 V1284"/>
+          <path class="ln draw" pathLength="1" style="--i:2" d="M360 885 L712 690 L870 778"/>
+          <path class="ln draw" pathLength="1" style="--i:3" d="M715 882 L910 760 L1105 868 M780 858 H1040"/>
+          <path class="ln draw" pathLength="1" style="--i:4" d="M415 852 V750 H450 V832"/>
+          <path class="ln draw" pathLength="1" style="--i:4" d="M345 1075 L590 995 L840 1080 M432 1085 V1280 M773 1085 V1280"/>
+          <path class="ln draw" pathLength="1" style="--i:5" d="M630 1265 V1115 H745 V1265"/>
+          <path class="ln draw thin" pathLength="1" style="--i:6" d="M478 910 H603 V1010 H478 Z M540 910 V1010 M668 910 H722 V990 H668 Z M835 890 H970 V1000 H835 Z M902 890 V1000 M477 1105 H603 V1218 H477 Z M540 1105 V1218 M835 1105 H970 V1218 H835 Z M902 1105 V1218"/>
+          <path class="ln draw thin" pathLength="1" style="--i:7" d="M408 1304 H1050 M408 1296 V1312 M1050 1296 V1312"/>
+          <text class="appear" style="--i:7" x="729" y="1332" font-size="22" text-anchor="middle">40′-0″</text>
+        </g>
+        </svg>
+      </div>
       <h1>Submit your deal. Talk to someone within 24&nbsp;hours.</h1>
       <p class="hero-sub">Fix &amp; flip, rental, gap, construction and private money loans for investors and builders. Tell us about the deal in about two minutes.</p>
       <div class="hero-actions">
@@ -879,7 +906,7 @@
 
     <!-- ===================== THE FORM ===================== -->
     <section class="section form-section" id="submit">
-      <div class="photo standin-hero" aria-hidden="true"></div>
+      <div class="photo standin-hero" id="form-photo" aria-hidden="true"></div>
 
       <div class="container form-layout">
         <div>
@@ -1062,9 +1089,12 @@
     //    swap them for real deal photos when you have them.)
     // =========================================================
     const PHOTOS = {
-      "hero-photo": "images/hero.webp"
+      "form-photo": "images/hero.webp"
       // program photos are listed in PROGRAMS below
     };
+    // The full-width hero photo is only used on wide screens (phones use the photo card)
+    const wideHero = window.matchMedia("(min-width: 760px) and (min-aspect-ratio: 4/3)");
+    function heroPhoto() { if (wideHero.matches) usePhoto(document.getElementById("hero-photo"), "images/hero.webp"); }
     function usePhoto(el, src) {
       const test = new Image();
       test.onload = function () {
@@ -1076,6 +1106,8 @@
     Object.keys(PHOTOS).forEach(function (id) {
       usePhoto(document.getElementById(id), PHOTOS[id]);
     });
+    heroPhoto();
+    wideHero.addEventListener("change", heroPhoto);
 
 
     // =========================================================
