@@ -4,7 +4,6 @@ Paste each prompt into ChatGPT (image generation) or Gemini, one at a time. Down
 
 Tips:
 - If a result isn't right, say what to change in plain words ("make the sky darker", "remove the car") instead of starting over.
-- These are AI drafts. Swap them for real photos of your own deals when you have them.
 - Don't ask for logos, readable signs or real people's faces.
 
 ---
