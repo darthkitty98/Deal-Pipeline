@@ -3,3 +3,4 @@
 
 # Personal Claude Code settings that shouldn't be shared
 .claude/settings.local.json
+*.zip
